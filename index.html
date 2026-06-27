@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Spin &amp; Win</title>
+<link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <canvas id="confetti-canvas"></canvas>
+
+  <main class="container">
+    <header class="header">
+      <h1>🎡 Spin &amp; Win</h1>
+      <a class="admin-link" href="admin.html">Admin</a>
+    </header>
+
+    <section id="name-screen" class="screen">
+      <h2>Enter your name to play</h2>
+      <form id="name-form">
+        <input id="player-name" type="text" maxlength="30" placeholder="Your name" required autocomplete="off" />
+        <button type="submit">Continue</button>
+      </form>
+    </section>
+
+    <section id="game-screen" class="screen" hidden>
+      <h2>Good luck, <span id="player-name-display"></span>!</h2>
+
+      <div class="wheel-wrapper">
+        <div class="pointer"></div>
+        <div id="wheel" class="wheel"></div>
+      </div>
+
+      <button id="spin-btn" type="button">SPIN</button>
+
+      <div id="result" class="result" hidden></div>
+
+      <button id="play-again-btn" type="button" hidden>Play Again</button>
+    </section>
+  </main>
+
+  <script src="config.js"></script>
+  <script src="confetti.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
