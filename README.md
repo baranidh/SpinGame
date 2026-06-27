@@ -12,11 +12,7 @@ An online spin-the-wheel game hosted on GitHub Pages.
    - **Better Luck Next Time**
 3. A confetti "party" animation fires when the spin finishes, scaled to the outcome (Grand Prize gets the biggest celebration).
 
-## Admin panel
-
-Visit `admin.html` (linked from the game page) to adjust the relative weight/odds of each outcome. It's protected by a password (`decentra`).
-
-> This is a static, client-only site — the admin password check and saved odds live in the browser's `localStorage`. It's a basic deterrent, not real security, and settings are per-browser/per-device, not shared globally. For real access control or a shared config across all players, you'd need a backend.
+The outcome odds are configured in `config.js` (the `weight` values under `DEFAULTS`).
 
 ## Running locally
 

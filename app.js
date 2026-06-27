@@ -28,7 +28,7 @@
       const mid = i * segmentSize + segmentSize / 2;
       const label = document.createElement('div');
       label.className = 'wheel-label';
-      label.style.transform = `rotate(${mid}deg) translate(0, -42%) rotate(${-mid}deg)`;
+      label.style.transform = `rotate(${mid}deg) translateY(-80px) rotate(${-mid}deg)`;
       label.textContent = config[key].label;
       wheel.appendChild(label);
     });
