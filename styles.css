@@ -71,26 +71,6 @@ body::after {
   z-index: 50;
 }
 
-.mute-btn {
-  position: fixed;
-  top: 14px;
-  right: 14px;
-  z-index: 60;
-  width: 46px;
-  height: 46px;
-  padding: 0;
-  font-size: 1.25rem;
-  line-height: 1;
-  letter-spacing: normal;
-  border-radius: 50%;
-  border: 2px solid #00eaff;
-  background: rgba(0, 16, 24, 0.6);
-  box-shadow: 0 0 10px rgba(0, 234, 255, 0.5);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
 .container {
   position: relative;
   z-index: 1;
@@ -268,15 +248,20 @@ button:disabled {
   left: 50%;
   width: 96px;
   margin-left: -48px;
+  transform-origin: top center;
+  pointer-events: none;
+  z-index: 2;
+}
+
+.label-text {
   text-align: center;
   font-family: 'Audiowide', 'Orbitron', sans-serif;
   font-size: 0.6rem;
   letter-spacing: 0.06em;
   text-transform: uppercase;
-  transform-origin: top center;
   line-height: 1.25;
-  pointer-events: none;
-  z-index: 2;
+  transform-origin: center;
+  transition: transform 4s cubic-bezier(0.17, 0.84, 0.42, 1);
 }
 
 #spin-btn {
