@@ -1,0 +1,179 @@
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  font-family: 'Segoe UI', Tahoma, Verdana, sans-serif;
+  background: linear-gradient(135deg, #1e1e3f, #3b0a45, #1e1e3f);
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+#confetti-canvas {
+  position: fixed;
+  top: 0;
+  left: 0;
+  pointer-events: none;
+  z-index: 50;
+}
+
+.container {
+  width: 100%;
+  max-width: 520px;
+  padding: 24px;
+  text-align: center;
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  margin-bottom: 16px;
+}
+
+.header h1 {
+  margin: 0;
+  font-size: 1.8rem;
+}
+
+.admin-link {
+  position: absolute;
+  right: 0;
+  font-size: 0.75rem;
+  color: #cfcfff;
+  text-decoration: none;
+  opacity: 0.6;
+}
+
+.admin-link:hover {
+  opacity: 1;
+}
+
+.screen {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 18px;
+}
+
+#name-form {
+  display: flex;
+  gap: 8px;
+  width: 100%;
+  max-width: 360px;
+}
+
+#name-form input {
+  flex: 1;
+  padding: 12px 14px;
+  border-radius: 8px;
+  border: none;
+  font-size: 1rem;
+}
+
+button {
+  padding: 12px 20px;
+  border-radius: 8px;
+  border: none;
+  background: #ff5e8a;
+  color: #fff;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: transform 0.15s ease, background 0.15s ease;
+}
+
+button:hover:not(:disabled) {
+  background: #ff7da1;
+  transform: translateY(-1px);
+}
+
+button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.wheel-wrapper {
+  position: relative;
+  width: 280px;
+  height: 280px;
+  margin: 10px auto;
+}
+
+.pointer {
+  position: absolute;
+  top: -6px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 0;
+  height: 0;
+  border-left: 14px solid transparent;
+  border-right: 14px solid transparent;
+  border-top: 22px solid #fff;
+  z-index: 10;
+  filter: drop-shadow(0 2px 2px rgba(0, 0, 0, 0.4));
+}
+
+.wheel {
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  border: 6px solid #fff;
+  position: relative;
+  transition: transform 4s cubic-bezier(0.17, 0.84, 0.42, 1);
+  box-shadow: 0 0 30px rgba(0, 0, 0, 0.4);
+}
+
+.wheel-label {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 110px;
+  margin-left: -55px;
+  text-align: center;
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: #1e1e3f;
+  text-shadow: 0 1px 1px rgba(255, 255, 255, 0.4);
+  transform-origin: top center;
+  line-height: 1.1;
+}
+
+#spin-btn {
+  font-size: 1.2rem;
+  padding: 14px 36px;
+  background: #ffb703;
+}
+
+#spin-btn:hover:not(:disabled) {
+  background: #ffc933;
+}
+
+.result {
+  font-size: 1.4rem;
+  font-weight: 700;
+  padding: 12px 20px;
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.result.grandPrize {
+  color: #f1c40f;
+}
+
+.result.bigWinner {
+  color: #3498db;
+}
+
+.result.winner {
+  color: #2ecc71;
+}
+
+.result.betterLuck {
+  color: #bdbdbd;
+}
