@@ -4,10 +4,10 @@ const SpinConfig = (() => {
   const OUTCOMES = ['winner', 'bigWinner', 'grandPrize', 'betterLuck'];
 
   const DEFAULTS = {
-    winner: { label: 'Winner', weight: 35, color: '#2ecc71' },
-    bigWinner: { label: 'Big Winner', weight: 20, color: '#3498db' },
-    grandPrize: { label: 'Grand Prize', weight: 8, color: '#f1c40f' },
-    betterLuck: { label: 'Better Luck Next Time', weight: 37, color: '#95a5a6' },
+    winner: { label: 'Winner', weight: 35, color: '#07262e' },
+    bigWinner: { label: 'Big Winner', weight: 20, color: '#0a1730' },
+    grandPrize: { label: 'Grand Prize', weight: 8, color: '#2c2207' },
+    betterLuck: { label: 'Better Luck Next Time', weight: 37, color: '#161d24' },
   };
 
   function clone(obj) {

@@ -14,6 +14,14 @@
   let currentRotation = 0;
   let spinning = false;
 
+  // Neon glow colour per outcome for the wheel labels (TRON palette).
+  const LABEL_GLOW = {
+    winner: '#2bf0ff',
+    bigWinner: '#5aa6ff',
+    grandPrize: '#ffce5c',
+    betterLuck: '#bcd6e8',
+  };
+
   buildWheel();
 
   function buildWheel() {
@@ -28,7 +36,10 @@
       const mid = i * segmentSize + segmentSize / 2;
       const label = document.createElement('div');
       label.className = 'wheel-label';
-      label.style.transform = `rotate(${mid}deg) translateY(-80px) rotate(${-mid}deg)`;
+      label.style.transform = `rotate(${mid}deg) translateY(-78px) rotate(${-mid}deg)`;
+      const glow = LABEL_GLOW[key] || '#d6fbff';
+      label.style.color = glow;
+      label.style.textShadow = `0 0 4px ${glow}, 0 0 12px ${glow}`;
       label.textContent = config[key].label;
       wheel.appendChild(label);
     });
