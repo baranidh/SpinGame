@@ -30,17 +30,28 @@
       return `${c} ${i * segmentSize}deg ${(i + 1) * segmentSize}deg`;
     }).join(', ');
     wheel.style.background = `conic-gradient(${gradientParts})`;
+    wheel.style.setProperty('--wheel-rot', '0deg');
 
     wheel.querySelectorAll('.wheel-label').forEach((el) => el.remove());
     SpinConfig.OUTCOMES.forEach((key, i) => {
       const mid = i * segmentSize + segmentSize / 2;
+      // Outer element positions the label within its segment (and keeps it
+      // upright relative to the wheel). The inner element cancels the wheel's
+      // rotation so the text always reads upright in screen space — including
+      // the winning segment that stops under the pointer.
       const label = document.createElement('div');
       label.className = 'wheel-label';
       label.style.transform = `rotate(${mid}deg) translateY(-78px) rotate(${-mid}deg)`;
+
+      const text = document.createElement('div');
+      text.className = 'label-text';
+      text.style.transform = 'rotate(calc(-1 * var(--wheel-rot)))';
       const glow = LABEL_GLOW[key] || '#d6fbff';
-      label.style.color = glow;
-      label.style.textShadow = `0 0 4px ${glow}, 0 0 12px ${glow}`;
-      label.textContent = config[key].label;
+      text.style.color = glow;
+      text.style.textShadow = `0 0 4px ${glow}, 0 0 12px ${glow}`;
+      text.textContent = config[key].label;
+
+      label.appendChild(text);
       wheel.appendChild(label);
     });
   }
@@ -73,6 +84,8 @@
     currentRotation += fullSpins * 360 + delta;
 
     wheel.style.transform = `rotate(${currentRotation}deg)`;
+    // Keep the labels upright by counter-rotating them in sync with the wheel.
+    wheel.style.setProperty('--wheel-rot', `${currentRotation}deg`);
 
     wheel.addEventListener('transitionend', function onEnd() {
       wheel.removeEventListener('transitionend', onEnd);
