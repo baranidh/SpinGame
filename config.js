@@ -1,9 +1,6 @@
-// Shared config storage for the Spin Game.
+// Shared config for the Spin Game.
 // Outcome order also defines the fixed visual wheel segments (4 equal slices).
 const SpinConfig = (() => {
-  const STORAGE_KEY = 'spinGameConfig';
-  const ADMIN_PASSWORD = 'decentra';
-
   const OUTCOMES = ['winner', 'bigWinner', 'grandPrize', 'betterLuck'];
 
   const DEFAULTS = {
@@ -13,34 +10,12 @@ const SpinConfig = (() => {
     betterLuck: { label: 'Better Luck Next Time', weight: 37, color: '#95a5a6' },
   };
 
-  function load() {
-    try {
-      const raw = localStorage.getItem(STORAGE_KEY);
-      if (!raw) return clone(DEFAULTS);
-      const parsed = JSON.parse(raw);
-      const merged = clone(DEFAULTS);
-      OUTCOMES.forEach((key) => {
-        if (parsed[key] && typeof parsed[key].weight === 'number') {
-          merged[key].weight = parsed[key].weight;
-        }
-      });
-      return merged;
-    } catch (e) {
-      return clone(DEFAULTS);
-    }
-  }
-
-  function save(config) {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(config));
-  }
-
-  function reset() {
-    localStorage.removeItem(STORAGE_KEY);
-    return clone(DEFAULTS);
-  }
-
   function clone(obj) {
     return JSON.parse(JSON.stringify(obj));
+  }
+
+  function load() {
+    return clone(DEFAULTS);
   }
 
   function pickOutcome(config) {
@@ -55,5 +30,5 @@ const SpinConfig = (() => {
     return OUTCOMES[OUTCOMES.length - 1];
   }
 
-  return { OUTCOMES, DEFAULTS, ADMIN_PASSWORD, load, save, reset, pickOutcome };
+  return { OUTCOMES, DEFAULTS, load, pickOutcome };
 })();
