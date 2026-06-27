@@ -46,6 +46,9 @@
 
     const baseRadius = 35; // mid arc radius within the 100x100 viewBox
     const lineGap = 7; // radial distance between wrapped lines
+    const baseFont = 4.6;
+    const entries = []; // collected for measurement once the SVG is in the DOM
+
     SpinConfig.OUTCOMES.forEach((key, i) => {
       const mid = i * segmentSize + segmentSize / 2;
       const glow = LABEL_GLOW[key] || '#d6fbff';
@@ -56,7 +59,7 @@
 
       lines.forEach((line, l) => {
         const radius = baseRadius + ((n - 1) / 2 - l) * lineGap; // outer line first
-        const span = segmentSize * 0.92;
+        const span = segmentSize * 0.94;
         const a0 = ((mid - span / 2) * Math.PI) / 180;
         const a1 = ((mid + span / 2) * Math.PI) / 180;
         const x0 = 50 + radius * Math.sin(a0);
@@ -71,12 +74,12 @@
         path.setAttribute('fill', 'none');
         defs.appendChild(path);
 
-        const arcLen = radius * (a1 - a0);
+        const pathLen = radius * (a1 - a0);
         const text = document.createElementNS(SVG_NS, 'text');
         text.setAttribute('fill', glow);
-        text.setAttribute('font-size', '4.6');
+        text.setAttribute('font-size', String(baseFont));
         text.setAttribute('font-family', 'Audiowide, Orbitron, sans-serif');
-        text.setAttribute('text-anchor', 'middle');
+        text.setAttribute('text-anchor', 'start');
         text.setAttribute('dominant-baseline', 'central');
         text.style.filter = `drop-shadow(0 0 0.7px ${glow}) drop-shadow(0 0 1.8px ${glow})`;
 
@@ -84,16 +87,46 @@
         textPath.setAttribute('href', `#${pathId}`);
         textPath.setAttributeNS('http://www.w3.org/1999/xlink', 'xlink:href', `#${pathId}`);
         textPath.setAttribute('startOffset', '50%');
-        textPath.setAttribute('textLength', (arcLen * 0.92).toFixed(2));
-        textPath.setAttribute('lengthAdjust', 'spacingAndGlyphs');
         textPath.textContent = line;
 
         text.appendChild(textPath);
         svg.appendChild(text);
+        entries.push({ text, textPath, pathLen });
       });
     });
 
     wheel.appendChild(svg);
+    fitLabels(entries, baseFont);
+  }
+
+  // Measure each label's real rendered width and centre it on its arc by
+  // computing an explicit startOffset (avoids iOS Safari's textLength/anchor
+  // bugs on <textPath>, which were clipping the trailing letters). Shrinks the
+  // font only when a label genuinely doesn't fit.
+  function fitLabels(entries, baseFont) {
+    entries.forEach(({ text, textPath, pathLen }) => {
+      let len = 0;
+      try {
+        len = textPath.getComputedTextLength();
+      } catch (e) {
+        len = 0;
+      }
+      if (!len) {
+        // Not measurable (e.g. wheel still hidden) — fall back to centring.
+        textPath.setAttribute('startOffset', '50%');
+        text.setAttribute('text-anchor', 'middle');
+        return;
+      }
+      const maxLen = pathLen * 0.94;
+      if (len > maxLen) {
+        const fs = baseFont * (maxLen / len);
+        text.setAttribute('font-size', fs.toFixed(3));
+        len = maxLen;
+      }
+      const offset = Math.max(0, (pathLen - len) / 2);
+      textPath.setAttribute('startOffset', offset.toFixed(3));
+      text.setAttribute('text-anchor', 'start');
+    });
   }
 
   // Greedily wrap a label into lines no longer than maxChars (keeps whole words).
@@ -122,7 +155,17 @@
     playerNameDisplay.textContent = name;
     nameScreen.hidden = true;
     gameScreen.hidden = false;
+    // Rebuild now that the wheel is visible so label widths can be measured
+    // and centred precisely.
+    buildWheel();
   });
+
+  // Re-fit labels once the web fonts have loaded (measurements depend on them).
+  if (document.fonts && document.fonts.ready) {
+    document.fonts.ready.then(() => {
+      if (!gameScreen.hidden) buildWheel();
+    });
+  }
 
   spinBtn.addEventListener('click', () => {
     if (spinning) return;
