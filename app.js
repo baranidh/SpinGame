@@ -22,6 +22,8 @@
     betterLuck: '#bcd6e8',
   };
 
+  const SVG_NS = 'http://www.w3.org/2000/svg';
+
   buildWheel();
 
   function buildWheel() {
@@ -30,30 +32,59 @@
       return `${c} ${i * segmentSize}deg ${(i + 1) * segmentSize}deg`;
     }).join(', ');
     wheel.style.background = `conic-gradient(${gradientParts})`;
-    wheel.style.setProperty('--wheel-rot', '0deg');
 
-    wheel.querySelectorAll('.wheel-label').forEach((el) => el.remove());
+    const existing = wheel.querySelector('.wheel-text');
+    if (existing) existing.remove();
+
+    // Curved labels that follow the wheel's perimeter, drawn as SVG text on a
+    // circular arc centred on each segment.
+    const svg = document.createElementNS(SVG_NS, 'svg');
+    svg.setAttribute('class', 'wheel-text');
+    svg.setAttribute('viewBox', '0 0 100 100');
+    const defs = document.createElementNS(SVG_NS, 'defs');
+    svg.appendChild(defs);
+
+    const radius = 35; // arc radius within the 100x100 viewBox
     SpinConfig.OUTCOMES.forEach((key, i) => {
       const mid = i * segmentSize + segmentSize / 2;
-      // Outer element positions the label within its segment (and keeps it
-      // upright relative to the wheel). The inner element cancels the wheel's
-      // rotation so the text always reads upright in screen space — including
-      // the winning segment that stops under the pointer.
-      const label = document.createElement('div');
-      label.className = 'wheel-label';
-      label.style.transform = `rotate(${mid}deg) translateY(-78px) rotate(${-mid}deg)`;
+      const span = segmentSize * 0.9; // leave a little padding inside the slice
+      const a0 = ((mid - span / 2) * Math.PI) / 180;
+      const a1 = ((mid + span / 2) * Math.PI) / 180;
+      const x0 = 50 + radius * Math.sin(a0);
+      const y0 = 50 - radius * Math.cos(a0);
+      const x1 = 50 + radius * Math.sin(a1);
+      const y1 = 50 - radius * Math.cos(a1);
 
-      const text = document.createElement('div');
-      text.className = 'label-text';
-      text.style.transform = 'rotate(calc(-1 * var(--wheel-rot)))';
+      const pathId = `arc-${key}`;
+      const path = document.createElementNS(SVG_NS, 'path');
+      path.setAttribute('id', pathId);
+      path.setAttribute('d', `M ${x0.toFixed(3)} ${y0.toFixed(3)} A ${radius} ${radius} 0 0 1 ${x1.toFixed(3)} ${y1.toFixed(3)}`);
+      path.setAttribute('fill', 'none');
+      defs.appendChild(path);
+
       const glow = LABEL_GLOW[key] || '#d6fbff';
-      text.style.color = glow;
-      text.style.textShadow = `0 0 4px ${glow}, 0 0 12px ${glow}`;
-      text.textContent = config[key].label;
+      const arcLen = radius * (a1 - a0);
+      const text = document.createElementNS(SVG_NS, 'text');
+      text.setAttribute('fill', glow);
+      text.setAttribute('font-size', '4.6');
+      text.setAttribute('font-family', 'Audiowide, Orbitron, sans-serif');
+      text.setAttribute('text-anchor', 'middle');
+      text.setAttribute('dominant-baseline', 'central');
+      text.style.filter = `drop-shadow(0 0 0.7px ${glow}) drop-shadow(0 0 1.8px ${glow})`;
 
-      label.appendChild(text);
-      wheel.appendChild(label);
+      const textPath = document.createElementNS(SVG_NS, 'textPath');
+      textPath.setAttribute('href', `#${pathId}`);
+      textPath.setAttributeNS('http://www.w3.org/1999/xlink', 'xlink:href', `#${pathId}`);
+      textPath.setAttribute('startOffset', '50%');
+      textPath.setAttribute('textLength', (arcLen * 0.96).toFixed(2));
+      textPath.setAttribute('lengthAdjust', 'spacingAndGlyphs');
+      textPath.textContent = config[key].label.toUpperCase();
+
+      text.appendChild(textPath);
+      svg.appendChild(text);
     });
+
+    wheel.appendChild(svg);
   }
 
   nameForm.addEventListener('submit', (e) => {
@@ -84,8 +115,6 @@
     currentRotation += fullSpins * 360 + delta;
 
     wheel.style.transform = `rotate(${currentRotation}deg)`;
-    // Keep the labels upright by counter-rotating them in sync with the wheel.
-    wheel.style.setProperty('--wheel-rot', `${currentRotation}deg`);
 
     wheel.addEventListener('transitionend', function onEnd() {
       wheel.removeEventListener('transitionend', onEnd);

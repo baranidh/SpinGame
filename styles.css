@@ -242,26 +242,14 @@ button:disabled {
   z-index: 1;
 }
 
-.wheel-label {
+.wheel-text {
   position: absolute;
-  top: 50%;
-  left: 50%;
-  width: 96px;
-  margin-left: -48px;
-  transform-origin: top center;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
   pointer-events: none;
   z-index: 2;
-}
-
-.label-text {
-  text-align: center;
-  font-family: 'Audiowide', 'Orbitron', sans-serif;
-  font-size: 0.6rem;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
-  line-height: 1.25;
-  transform-origin: center;
-  transition: transform 4s cubic-bezier(0.17, 0.84, 0.42, 1);
 }
 
 #spin-btn {
