@@ -18,6 +18,12 @@
       <h1>🎡 Decentralized IAM : Spin and Win</h1>
     </header>
 
+    <nav class="tabs">
+      <button type="button" class="tab active" data-tab="spin">🎡 Spin &amp; Win</button>
+      <button type="button" class="tab" data-tab="quiz">❓ Quiz</button>
+    </nav>
+
+    <div id="spin-panel" class="panel">
     <section id="name-screen" class="screen">
       <h2>Enter your name to play</h2>
       <form id="name-form">
@@ -42,6 +48,16 @@
 
       <button id="play-again-btn" type="button" hidden>Play Again</button>
     </section>
+    </div>
+
+    <div id="quiz-panel" class="panel" hidden>
+      <h2>Decentralized Authentication Quiz</h2>
+      <p class="quiz-intro">Answer all four questions, then submit to see your score.</p>
+      <form id="quiz-form"></form>
+      <button id="quiz-submit" type="button">Submit Answers</button>
+      <div id="quiz-result" class="result" hidden></div>
+      <button id="quiz-retry" type="button" hidden>Try Again</button>
+    </div>
   </main>
 
   <!-- Discreet operator control: tap a colour to preset the next result. -->
@@ -50,5 +66,6 @@
   <script src="config.js"></script>
   <script src="confetti.js"></script>
   <script src="app.js"></script>
+  <script src="quiz.js"></script>
 </body>
 </html>
