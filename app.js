@@ -5,147 +5,93 @@
   const playerNameInput = document.getElementById('player-name');
   const playerNameDisplay = document.getElementById('player-name-display');
   const wheel = document.getElementById('wheel');
+  const wheelRing = document.getElementById('wheel-ring');
   const spinBtn = document.getElementById('spin-btn');
   const resultEl = document.getElementById('result');
   const playAgainBtn = document.getElementById('play-again-btn');
+  const rigControl = document.getElementById('rig-control');
 
   const config = SpinConfig.load();
   const segmentSize = 360 / SpinConfig.OUTCOMES.length;
+  const labelRadius = 100; // px from centre to each label anchor
   let currentRotation = 0;
   let spinning = false;
 
-  // Neon glow colour per outcome for the wheel labels (TRON palette).
-  const LABEL_GLOW = {
-    winner: '#2bf0ff',
-    bigWinner: '#5aa6ff',
-    grandPrize: '#ffce5c',
-    betterLuck: '#bcd6e8',
-  };
+  // Preset outcome chosen discreetly via the corner control. When null the
+  // wheel falls back to a weighted random pick.
+  let forcedOutcome = null;
 
-  const SVG_NS = 'http://www.w3.org/2000/svg';
-
+  buildRivets();
   buildWheel();
+  buildRigControl();
+
+  // Gold rivets evenly spaced around the ring.
+  function buildRivets() {
+    const count = 16;
+    const r = 148; // distance from centre within the 320px wrapper
+    for (let i = 0; i < count; i += 1) {
+      const rivet = document.createElement('div');
+      rivet.className = 'rivet';
+      rivet.style.transform = `rotate(${(360 / count) * i}deg) translateY(-${r}px)`;
+      wheelRing.appendChild(rivet);
+    }
+  }
 
   function buildWheel() {
-    const gradientParts = SpinConfig.OUTCOMES.map((key, i) => {
-      const c = config[key].color;
-      return `${c} ${i * segmentSize}deg ${(i + 1) * segmentSize}deg`;
+    // Segments are centred on the top (Jackpot at 12 o'clock) by starting the
+    // conic gradient half a segment before 0deg.
+    const stops = SpinConfig.OUTCOMES.map((key, i) => {
+      return `${config[key].color} ${i * segmentSize}deg ${(i + 1) * segmentSize}deg`;
     }).join(', ');
-    wheel.style.background = `conic-gradient(${gradientParts})`;
+    wheel.style.background = `conic-gradient(from ${-segmentSize / 2}deg, ${stops})`;
 
-    const existing = wheel.querySelector('.wheel-text');
-    if (existing) existing.remove();
-
-    // Curved labels that follow the wheel's perimeter, drawn as SVG text on a
-    // circular arc centred on each segment.
-    const svg = document.createElementNS(SVG_NS, 'svg');
-    svg.setAttribute('class', 'wheel-text');
-    svg.setAttribute('viewBox', '0 0 100 100');
-    const defs = document.createElementNS(SVG_NS, 'defs');
-    svg.appendChild(defs);
-
-    const baseRadius = 35; // mid arc radius within the 100x100 viewBox
-    const lineGap = 7; // radial distance between wrapped lines
-    const baseFont = 4.6;
-    const entries = []; // collected for measurement once the SVG is in the DOM
+    wheel.querySelectorAll('.seg-label').forEach((el) => el.remove());
 
     SpinConfig.OUTCOMES.forEach((key, i) => {
-      const mid = i * segmentSize + segmentSize / 2;
-      const glow = LABEL_GLOW[key] || '#d6fbff';
-      // Wrap the label so every letter fits comfortably; each line gets its own
-      // concentric arc so nothing is squished or clipped.
-      const lines = wrapLabel(config[key].label.toUpperCase(), 11);
-      const n = lines.length;
+      const mid = i * segmentSize; // segment centre angle (0 = top)
+      const outer = document.createElement('div');
+      outer.className = 'seg-label';
+      // Position the label along the segment's centre line, kept upright within
+      // the wheel's own frame.
+      outer.style.transform = `rotate(${mid}deg) translateY(-${labelRadius}px) rotate(${-mid}deg)`;
 
-      lines.forEach((line, l) => {
-        const radius = baseRadius + ((n - 1) / 2 - l) * lineGap; // outer line first
-        const span = segmentSize * 0.94;
-        const a0 = ((mid - span / 2) * Math.PI) / 180;
-        const a1 = ((mid + span / 2) * Math.PI) / 180;
-        const x0 = 50 + radius * Math.sin(a0);
-        const y0 = 50 - radius * Math.cos(a0);
-        const x1 = 50 + radius * Math.sin(a1);
-        const y1 = 50 - radius * Math.cos(a1);
+      // Inner element counter-rotates the wheel's spin so the text always reads
+      // horizontally (upright) in screen space, like the reference design.
+      const inner = document.createElement('div');
+      inner.className = 'seg-label-inner';
+      inner.style.transform = `rotate(${-currentRotation}deg)`;
 
-        const pathId = `arc-${key}-${l}`;
-        const path = document.createElementNS(SVG_NS, 'path');
-        path.setAttribute('id', pathId);
-        path.setAttribute('d', `M ${x0.toFixed(3)} ${y0.toFixed(3)} A ${radius} ${radius} 0 0 1 ${x1.toFixed(3)} ${y1.toFixed(3)}`);
-        path.setAttribute('fill', 'none');
-        defs.appendChild(path);
+      const text = document.createElement('div');
+      text.className = 'seg-text';
+      text.textContent = config[key].label.toUpperCase();
 
-        const pathLen = radius * (a1 - a0);
-        const text = document.createElementNS(SVG_NS, 'text');
-        text.setAttribute('fill', glow);
-        text.setAttribute('font-size', String(baseFont));
-        text.setAttribute('font-family', 'Audiowide, Orbitron, sans-serif');
-        text.setAttribute('text-anchor', 'start');
-        text.setAttribute('dominant-baseline', 'central');
-        text.style.filter = `drop-shadow(0 0 0.7px ${glow}) drop-shadow(0 0 1.8px ${glow})`;
+      const icon = document.createElement('div');
+      icon.className = 'seg-icon';
+      icon.textContent = config[key].icon || '';
 
-        const textPath = document.createElementNS(SVG_NS, 'textPath');
-        textPath.setAttribute('href', `#${pathId}`);
-        textPath.setAttributeNS('http://www.w3.org/1999/xlink', 'xlink:href', `#${pathId}`);
-        textPath.setAttribute('startOffset', '50%');
-        textPath.textContent = line;
+      inner.appendChild(text);
+      inner.appendChild(icon);
+      outer.appendChild(inner);
+      wheel.appendChild(outer);
+    });
+  }
 
-        text.appendChild(textPath);
-        svg.appendChild(text);
-        entries.push({ text, textPath, pathLen });
+  // Small coloured dots in the corner. The last one tapped is the outcome the
+  // next spin lands on; there is no visible "selected" state so it stays discreet.
+  function buildRigControl() {
+    SpinConfig.OUTCOMES.forEach((key) => {
+      const dot = document.createElement('button');
+      dot.type = 'button';
+      dot.className = 'rig-dot';
+      dot.style.background = config[key].color;
+      dot.addEventListener('click', () => {
+        forcedOutcome = key;
+        // Brief, subtle click acknowledgement only (no lasting highlight).
+        dot.style.opacity = '0.35';
+        setTimeout(() => { dot.style.opacity = ''; }, 120);
       });
+      rigControl.appendChild(dot);
     });
-
-    wheel.appendChild(svg);
-    fitLabels(entries, baseFont);
-  }
-
-  // Measure each label's real rendered width and centre it on its arc by
-  // computing an explicit startOffset (avoids iOS Safari's textLength/anchor
-  // bugs on <textPath>, which were clipping the trailing letters). Shrinks the
-  // font only when a label genuinely doesn't fit.
-  function fitLabels(entries, baseFont) {
-    entries.forEach(({ text, textPath, pathLen }) => {
-      let len = 0;
-      try {
-        len = textPath.getComputedTextLength();
-      } catch (e) {
-        len = 0;
-      }
-      if (!len) {
-        // Not measurable (e.g. wheel still hidden) — fall back to centring.
-        textPath.setAttribute('startOffset', '50%');
-        text.setAttribute('text-anchor', 'middle');
-        return;
-      }
-      const maxLen = pathLen * 0.94;
-      if (len > maxLen) {
-        const fs = baseFont * (maxLen / len);
-        text.setAttribute('font-size', fs.toFixed(3));
-        len = maxLen;
-      }
-      const offset = Math.max(0, (pathLen - len) / 2);
-      textPath.setAttribute('startOffset', offset.toFixed(3));
-      text.setAttribute('text-anchor', 'start');
-    });
-  }
-
-  // Greedily wrap a label into lines no longer than maxChars (keeps whole words).
-  function wrapLabel(label, maxChars) {
-    const words = label.split(' ');
-    const lines = [];
-    let current = '';
-    words.forEach((word) => {
-      if (!current) {
-        current = word;
-      } else if ((current + ' ' + word).length <= maxChars) {
-        current += ' ' + word;
-      } else {
-        lines.push(current);
-        current = word;
-      }
-    });
-    if (current) lines.push(current);
-    return lines;
   }
 
   nameForm.addEventListener('submit', (e) => {
@@ -155,17 +101,7 @@
     playerNameDisplay.textContent = name;
     nameScreen.hidden = true;
     gameScreen.hidden = false;
-    // Rebuild now that the wheel is visible so label widths can be measured
-    // and centred precisely.
-    buildWheel();
   });
-
-  // Re-fit labels once the web fonts have loaded (measurements depend on them).
-  if (document.fonts && document.fonts.ready) {
-    document.fonts.ready.then(() => {
-      if (!gameScreen.hidden) buildWheel();
-    });
-  }
 
   spinBtn.addEventListener('click', () => {
     if (spinning) return;
@@ -174,18 +110,24 @@
     resultEl.hidden = true;
     playAgainBtn.hidden = true;
 
-    const liveConfig = SpinConfig.load();
-    const outcomeKey = SpinConfig.pickOutcome(liveConfig);
+    const outcomeKey = forcedOutcome || SpinConfig.pickOutcome(SpinConfig.load());
     const outcomeIndex = SpinConfig.OUTCOMES.indexOf(outcomeKey);
-    const segmentStart = outcomeIndex * segmentSize;
-    const padding = segmentSize * 0.15;
-    const targetAngle = segmentStart + padding + Math.random() * (segmentSize - 2 * padding);
+    const segmentCenter = outcomeIndex * segmentSize; // 0 = top
+    // Land somewhere inside the winning segment, near its centre.
+    const jitter = (Math.random() * 2 - 1) * (segmentSize * 0.35);
+    const targetAngle = segmentCenter + jitter;
 
     const fullSpins = 5 + Math.floor(Math.random() * 3);
-    const delta = ((360 - targetAngle) - (currentRotation % 360) + 360) % 360;
+    const current = ((currentRotation % 360) + 360) % 360;
+    const want = ((-targetAngle) % 360 + 360) % 360;
+    const delta = ((want - current) % 360 + 360) % 360;
     currentRotation += fullSpins * 360 + delta;
 
     wheel.style.transform = `rotate(${currentRotation}deg)`;
+    // Keep the labels upright as the wheel turns.
+    wheel.querySelectorAll('.seg-label-inner').forEach((el) => {
+      el.style.transform = `rotate(${-currentRotation}deg)`;
+    });
 
     wheel.addEventListener('transitionend', function onEnd() {
       wheel.removeEventListener('transitionend', onEnd);
@@ -200,22 +142,21 @@
     playAgainBtn.hidden = true;
   });
 
+  const RESULT = {
+    jackpot: { text: '🎉 JACKPOT! 🎉', confetti: { count: 350, durationMs: 5000 } },
+    bigWin: { text: '🎉 BIG WIN! 🎉', confetti: { count: 260, durationMs: 4000 } },
+    mediumWin: { text: '🎉 MEDIUM WIN! 🎉', confetti: { count: 190, durationMs: 3200 } },
+    smallWin: { text: 'SMALL WIN! 😊', confetti: { count: 130, durationMs: 2600 } },
+    spinAgain: { text: 'SPIN AGAIN! 🔄', confetti: { count: 90, durationMs: 2000 } },
+    betterLuck: { text: 'Better Luck Next Time 🍀', confetti: { count: 50, durationMs: 1600 } },
+  };
+
   function showResult(outcomeKey) {
-    const outcome = config[outcomeKey] || SpinConfig.DEFAULTS[outcomeKey];
-    resultEl.textContent = outcomeKey === 'betterLuck'
-      ? `${outcome.label} — try again!`
-      : `🎉 ${outcome.label}! 🎉`;
-    resultEl.className = `result ${outcomeKey}`;
+    const info = RESULT[outcomeKey] || { text: config[outcomeKey].label, confetti: { count: 120, durationMs: 2500 } };
+    resultEl.textContent = info.text;
+    resultEl.style.color = config[outcomeKey].color;
     resultEl.hidden = false;
     playAgainBtn.hidden = false;
-
-    const intensity = {
-      grandPrize: { count: 300, durationMs: 4500 },
-      bigWinner: { count: 200, durationMs: 3500 },
-      winner: { count: 150, durationMs: 3000 },
-      betterLuck: { count: 60, durationMs: 1800 },
-    }[outcomeKey] || { count: 100, durationMs: 2500 };
-
-    Confetti.burst(intensity);
+    Confetti.burst(info.confetti);
   }
 })();

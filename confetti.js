@@ -12,7 +12,7 @@ const Confetti = (() => {
   window.addEventListener('resize', resize);
   resize();
 
-  function burst({ count = 150, colors = ['#00eaff', '#2d7dff', '#ffb300', '#39ff14', '#ffffff'], durationMs = 3000 } = {}) {
+  function burst({ count = 150, colors = ['#F2C230', '#E0322E', '#E8722A', '#4CAF50', '#2F55C7', '#6A2C9A', '#ffffff'], durationMs = 3000 } = {}) {
     const newParticles = Array.from({ length: count }, () => ({
       x: Math.random() * canvas.width,
       y: -20 - Math.random() * canvas.height * 0.3,
