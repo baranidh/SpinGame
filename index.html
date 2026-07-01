@@ -6,7 +6,7 @@
 <title>Decentralized IAM : Spin and Win — Expert Engineer Expo</title>
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-<link href="https://fonts.googleapis.com/css2?family=Audiowide&family=Orbitron:wght@400;500;700;900&display=swap" rel="stylesheet" />
+<link href="https://fonts.googleapis.com/css2?family=Audiowide&family=Fredoka:wght@500;600;700&family=Orbitron:wght@400;500;700;900&display=swap" rel="stylesheet" />
 <link rel="stylesheet" href="styles.css" />
 </head>
 <body>
@@ -30,8 +30,10 @@
       <h2>Good luck, <span id="player-name-display"></span>!</h2>
 
       <div class="wheel-wrapper">
-        <div class="pointer"></div>
+        <div class="wheel-ring" id="wheel-ring"></div>
         <div id="wheel" class="wheel"></div>
+        <div class="wheel-hub">★</div>
+        <div class="pointer"></div>
       </div>
 
       <button id="spin-btn" type="button">SPIN</button>
@@ -41,6 +43,9 @@
       <button id="play-again-btn" type="button" hidden>Play Again</button>
     </section>
   </main>
+
+  <!-- Discreet operator control: tap a colour to preset the next result. -->
+  <div id="rig-control" class="rig-control" aria-hidden="true"></div>
 
   <script src="config.js"></script>
   <script src="confetti.js"></script>

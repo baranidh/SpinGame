@@ -1,13 +1,15 @@
 // Shared config for the Spin Game.
-// Outcome order also defines the fixed visual wheel segments (4 equal slices).
+// Outcome order defines the wheel segments, clockwise starting at the top.
 const SpinConfig = (() => {
-  const OUTCOMES = ['winner', 'bigWinner', 'grandPrize', 'betterLuck'];
+  const OUTCOMES = ['jackpot', 'bigWin', 'mediumWin', 'smallWin', 'spinAgain', 'betterLuck'];
 
   const DEFAULTS = {
-    winner: { label: 'Winner', weight: 35, color: '#07262e' },
-    bigWinner: { label: 'Big Winner', weight: 20, color: '#0a1730' },
-    grandPrize: { label: 'Grand Prize', weight: 8, color: '#2c2207' },
-    betterLuck: { label: 'Better Luck Next Time', weight: 37, color: '#161d24' },
+    jackpot: { label: 'Jackpot', weight: 6, color: '#F2C230', icon: '🏆' },
+    bigWin: { label: 'Big Win', weight: 12, color: '#E0322E', icon: '🎁' },
+    mediumWin: { label: 'Medium Win', weight: 18, color: '#E8722A', icon: '⭐' },
+    smallWin: { label: 'Small Win', weight: 24, color: '#4CAF50', icon: '😊' },
+    spinAgain: { label: 'Spin Again', weight: 20, color: '#2F55C7', icon: '🔄' },
+    betterLuck: { label: 'Better Luck Next Time', weight: 20, color: '#6A2C9A', icon: '🍀' },
   };
 
   function clone(obj) {
