@@ -362,10 +362,15 @@ button:disabled {
   border-radius: 50%;
   cursor: pointer;
   box-shadow: none;
-  transition: opacity 0.12s ease;
+  outline: none;
+  -webkit-tap-highlight-color: transparent;
 }
 
-.rig-dot:hover:not(:disabled) {
+.rig-dot:hover:not(:disabled),
+.rig-dot:focus,
+.rig-dot:active {
   transform: none;
   box-shadow: none;
+  outline: none;
+  opacity: inherit;
 }

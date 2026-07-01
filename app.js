@@ -85,10 +85,8 @@
       dot.className = 'rig-dot';
       dot.style.background = config[key].color;
       dot.addEventListener('click', () => {
+        // No visible reaction on tap, so the choice stays hidden.
         forcedOutcome = key;
-        // Brief, subtle click acknowledgement only (no lasting highlight).
-        dot.style.opacity = '0.35';
-        setTimeout(() => { dot.style.opacity = ''; }, 120);
       });
       rigControl.appendChild(dot);
     });
