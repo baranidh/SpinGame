@@ -76,8 +76,8 @@
     });
   }
 
-  // Small coloured dots in the corner. Tapping one presets the next result;
-  // there is no visible "selected" state so the choice stays discreet.
+  // Small coloured dots in the corner. The last one tapped is the outcome the
+  // next spin lands on; there is no visible "selected" state so it stays discreet.
   function buildRigControl() {
     SpinConfig.OUTCOMES.forEach((key) => {
       const dot = document.createElement('button');
@@ -85,7 +85,7 @@
       dot.className = 'rig-dot';
       dot.style.background = config[key].color;
       dot.addEventListener('click', () => {
-        forcedOutcome = forcedOutcome === key ? null : key;
+        forcedOutcome = key;
         // Brief, subtle click acknowledgement only (no lasting highlight).
         dot.style.opacity = '0.35';
         setTimeout(() => { dot.style.opacity = ''; }, 120);
